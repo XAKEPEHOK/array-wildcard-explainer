@@ -4,7 +4,7 @@ that match passed wildcard path. See examples below.
 
 ### Installation:
 ```bash
-composer require xakepehok/array-wilrdcard-explainer
+composer require xakepehok/array-wildcard-explainer
 ```
 
 ## Usage
