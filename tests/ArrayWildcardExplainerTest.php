@@ -59,6 +59,11 @@ class ArrayWildcardExplainerTest extends TestCase
                         ],
                     ],
                 ],
+                'value_6' => [
+                    [
+                        'filter' => [111],
+                    ],
+                ],
             ],
         ];
     }
@@ -116,6 +121,12 @@ class ArrayWildcardExplainerTest extends TestCase
                     'array.3.value_3.1.value_1',
                 ]
             ],
+            [
+                'array.value_6.*.filter',
+                [
+                    'array.value_6.0.filter',
+                ]
+            ]
         ];
 
         return array_combine(array_column($data, 0), $data);

@@ -35,7 +35,7 @@ class ArrayWildcardExplainer
         foreach ($flat as $path) {
             $extended[$path] = $path;
             $elements = explode('.', $path);
-            while (array_pop($elements)) {
+            while (array_pop($elements) !== null) {
                 $value = implode('.', $elements);
                 $extended[$value] = $value;
             }
