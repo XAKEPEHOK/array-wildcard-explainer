@@ -8,6 +8,7 @@ class ArrayWildcardExplainerTest extends TestCase
 {
 
     private array $data;
+    private array $dataSimple;
 
     protected function setUp(): void
     {
@@ -66,9 +67,20 @@ class ArrayWildcardExplainerTest extends TestCase
                 ],
             ],
         ];
+
+        $this->dataSimple = [
+            'direct' => 1,
+            'nested' => [
+                'value_1' => 11,
+                'value_2' => [
+                    ['value' => 111],
+                    ['value' => 222],
+                ],
+            ],
+        ];
     }
 
-    public function expandDataProvider(): array
+    public function explainDataProvider(): array
     {
         $data = [
             [
@@ -133,12 +145,110 @@ class ArrayWildcardExplainerTest extends TestCase
     }
 
     /**
-     * @dataProvider expandDataProvider
+     * @dataProvider explainDataProvider
      * @param $input
      * @param $expected
      */
-    public function testExpandOne($input, $expected)
+    public function testExplainOne($input, $expected)
     {
         $this->assertEquals($expected, ArrayWildcardExplainer::explainOne($this->data, $input));
+    }
+
+    public function explainInverseOneDataProvider(): array
+    {
+        $data = [
+            [
+                'direct',
+                [
+                    'nested.value_1',
+                    'nested.value_2.0.value',
+                    'nested.value_2.1.value',
+                ]
+            ],
+            [
+                'nested.*',
+                [
+                    'direct',
+                    'nested.value_2.0.value',
+                    'nested.value_2.1.value',
+                ]
+            ],
+            [
+                'nested.value_2',
+                [
+                    'direct',
+                    'nested.value_1',
+                    'nested.value_2.0.value',
+                    'nested.value_2.1.value',
+                ]
+            ],
+            [
+                'nested.*.*.value',
+                [
+                    'direct',
+                    'nested.value_1',
+                ]
+            ],
+        ];
+
+        return array_combine(array_column($data, 0), $data);
+    }
+
+    /**
+     * @dataProvider explainInverseOneDataProvider
+     * @param $input
+     * @param $expected
+     */
+    public function testExplainInverseOne($input, $expected)
+    {
+        $this->assertEquals($expected, ArrayWildcardExplainer::explainOne($this->dataSimple, $input, true));
+    }
+
+    public function explainInverseManyDataProvider(): array
+    {
+        $data = [
+            [
+                ['direct', 'nested.*'],
+                [
+                    'nested.value_2.0.value',
+                    'nested.value_2.1.value'
+                ]
+            ],
+            [
+                ['nested.*', 'nested.value_2'],
+                [
+                    'direct',
+                    'nested.value_2.0.value',
+                    'nested.value_2.1.value',
+                ]
+            ],
+            [
+                ['direct', 'nested.value_2'],
+                [
+                    'nested.value_1',
+                    'nested.value_2.0.value',
+                    'nested.value_2.1.value',
+                ]
+            ],
+            [
+                ['nested.value_2', 'nested.*.*.value'],
+                [
+                    'direct',
+                    'nested.value_1',
+                ]
+            ],
+        ];
+
+        return array_combine(array_map('json_encode', array_column($data, 0)), $data);
+    }
+
+    /**
+     * @dataProvider explainInverseManyDataProvider
+     * @param $input
+     * @param $expected
+     */
+    public function testExplainInverseMany($input, $expected)
+    {
+        $this->assertEquals($expected, ArrayWildcardExplainer::explainMany($this->dataSimple, $input, true));
     }
 }

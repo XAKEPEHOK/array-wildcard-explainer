@@ -12,6 +12,12 @@ class ArrayWildcardExplainer
     public static function explainOne(array $data, string $key, bool $inverse = false): array
     {
         $result = self::explain($data, $key, $inverse);
+
+        if ($inverse) {
+            $flat = array_keys(self::flatten($data));
+            $result = array_diff($flat, $result);
+        }
+
         sort($result);
         return array_values($result);
     }
@@ -20,14 +26,19 @@ class ArrayWildcardExplainer
     {
         $result = [];
         foreach ($keys as $key) {
-            $result = array_merge($result, self::explain($data, $key, $inverse));
+            $result = array_merge($result, self::explain($data, $key));
+        }
+
+        if ($inverse) {
+            $flat = array_keys(self::flatten($data));
+            $result = array_diff($flat, $result);
         }
 
         sort($result);
         return array_values($result);
     }
 
-    private static function explain(array $data, string $key, bool $inverse = false): array
+    private static function explain(array $data, string $key): array
     {
         $flat = array_keys(self::flatten($data));
 
@@ -49,10 +60,7 @@ class ArrayWildcardExplainer
         ));
         $regex = "~^{$regex}$~";
 
-        return array_filter($extended, function ($value) use ($regex, $inverse) {
-            if ($inverse) {
-                return !preg_match($regex, $value);
-            }
+        return array_filter($extended, function ($value) use ($regex) {
             return preg_match($regex, $value);
         });
     }
